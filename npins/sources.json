@@ -1,0 +1,17 @@
+{
+  "pins": {
+    "nix-freifunk": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "nix-freifunk",
+        "repo": "nix-freifunk"
+      },
+      "branch": "main",
+      "revision": "d892e289ca5a59e0febd326fe9787cbad94d32f7",
+      "url": "https://github.com/nix-freifunk/nix-freifunk/archive/d892e289ca5a59e0febd326fe9787cbad94d32f7.tar.gz",
+      "hash": "05f960jbqz97p43vqj678vbj1mgp78yqa8arrk12y1khpajgsw6n"
+    }
+  },
+  "version": 3
+}
