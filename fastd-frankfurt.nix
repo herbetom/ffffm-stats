@@ -8,8 +8,11 @@ let
       secretKeyIncludeFile = "${pkgs.writeText "fastd-secret.key" ''
         secret "08e003f5b8a32c0620b073112363b07661d34646112208c9fe2233161dd4ed5c";
       ''}";
+      mode = "multitap";
+      persistInterface = false;
+      peerLimit = 1;
       extraConfig = ''
-        interface "vpnfm-${domain}";
+        interface "vfm-${domain}-%n";
       '';
       peers = [
         {
@@ -89,7 +92,7 @@ let
       networks = {
         "50-vpn-${domain}" = {
           matchConfig = {
-            Name = "vpnfm-${domain}";
+            Name = "vfm-${domain}-*";
           };
           linkConfig = {
             RequiredForOnline = false;
@@ -114,7 +117,7 @@ let
           networkConfig = {
             IPv6AcceptRA = true;
           };
-          DHCP = "no";
+          DHCP = "ipv4";
           dhcpV4Config = {
             UseDNS = false;
             UseGateway = false;
@@ -168,54 +171,58 @@ in
     (import sources.nix-freifunk)
   ];
 
-  config = lib.mkMerge ( fastdConnections ++[
+  config = lib.mkMerge ( fastdConnections ++ [
     {
       services.yanic = {
-      enable  = true;
-      autostart = true;
-      settings = {
-        respondd = {
-          enable = true;
-          synchronize = "1m";
-          collect_interval = "1m";
-          # sites = {
-          #   "${cfg.yanic.defaultSite}" = {
-          #     domains = builtins.concatMap (attrSet: builtins.attrNames attrSet) (lib.mapAttrsToList (name: value: value.names) enabledDomains);
-          #   };
-          # };
-        };
-        webserver = {
-          enable = false;
-          bind = "127.0.0.1:8080";
-        };
-        nodes = {
-          state_path = "/var/lib/yanic/state.json";
-          prune_after = "7d";
-          save_interval = "5s";
-          offline_after = "10m";
-          output = {
-            meshviewer-ffrgb = [
-              {
-                enable = true;
-                path = "/var/www/html/meshviewer/data/meshviewer.json";
-                filter = {
-                  no_owner = true;
-                };
-              }
-            ];
+        enable  = true;
+        autostart = true;
+        settings = {
+          respondd = {
+            enable = true;
+            synchronize = "1m";
+            collect_interval = "1m";
+            # sites = {
+            #   "${cfg.yanic.defaultSite}" = {
+            #     domains = builtins.concatMap (attrSet: builtins.attrNames attrSet) (lib.mapAttrsToList (name: value: value.names) enabledDomains);
+            #   };
+            # };
+          };
+          webserver = {
+            enable = false;
+            bind = "127.0.0.1:8080";
+          };
+          nodes = {
+            state_path = "/var/lib/yanic/state.json";
+            prune_after = "7d";
+            save_interval = "5s";
+            offline_after = "10m";
+            output = {
+              meshviewer-ffrgb = [
+                {
+                  enable = true;
+                  path = "/var/www/html/meshviewer/data/meshviewer.json";
+                  filter = {
+                    no_owner = true;
+                  };
+                }
+              ];
+            };
+          };
+          database = {
+            delete_after = "7d";
+            delete_interval = "1h";
           };
         };
-        database = {
-          delete_after = "7d";
-          delete_interval = "1h";
-        };
       };
-    };
 
-    systemd.services.yanic.preStart = ''
-      ${pkgs.coreutils}/bin/mkdir -p /var/www/html/meshviewer/data/
-      ${pkgs.coreutils}/bin/mkdir -p /var/lib/yanic/
-    '';
+      systemd.services.yanic.preStart = ''
+        ${pkgs.coreutils}/bin/mkdir -p /var/www/html/meshviewer/data/
+        ${pkgs.coreutils}/bin/mkdir -p /var/lib/yanic/
+      '';
+
+      environment.systemPackages = with pkgs; [
+        batctl
+      ];
     }
   ]);
 }
