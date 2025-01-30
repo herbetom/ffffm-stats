@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ modulesPath, lib, ... }:
+{ modulesPath, lib, pkgs, ... }:
 
 {
   imports = [
@@ -50,6 +50,38 @@
     settings.PasswordAuthentication = false;
   };
 
+  environment.systemPackages = with pkgs; [
+    vim
+    nano
+    wget
+    curl
+    iperf3
+    git
+    htop
+    tmux
+    mtr
+    parted
+    dmidecode
+    ncdu
+    bridge-utils
+    tcpdump
+    whois
+    netcat
+    jq
+    tree
+    tmate
+
+    dig
+    inetutils
+
+    ethtool
+    conntrack-tools
+
+    btop
+
+    unzip
+    zip
+  ];
 
   system.stateVersion = "24.11"; # Did you read the comment?
 }
